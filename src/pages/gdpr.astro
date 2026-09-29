@@ -1,0 +1,36 @@
+---
+import SimplePage from '../layouts/SimplePage.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { company } from '../data/company';
+
+// Po `npm run images:migrate` se PDF použije lokálně, jinak z CMS současného webu.
+const pdf = existsSync(join(process.cwd(), 'public/files/gdpr-informace.pdf'))
+  ? '/files/gdpr-informace.pdf'
+  : 'https://www.jplleseni.cz/file.php?nid=15093&oid=6489838';
+---
+
+<SimplePage
+  title="Ochrana osobních údajů"
+  seoTitle="Ochrana osobních údajů (GDPR) | J.P.L. LEŠENÍ"
+  description="Pravidla získávání a zpracování osobních údajů ve společnosti J.P.L. LEŠENÍ s.r.o. v souladu s nařízením (EU) 2016/679."
+  lead="Pravidla získávání a zpracování osobních údajů ve společnosti J.P.L. LEŠENÍ s.r.o. v souladu s nařízením Evropského parlamentu a Rady (EU) 2016/679."
+>
+  <h2>Správce</h2>
+  <p>
+    {company.legalName}, {company.seat.street}, {company.seat.zip}
+    {company.seat.city}, IČ {company.ico}. Kontakt: <a href={`mailto:${company.email}`}>{company.email}</a>.
+  </p>
+  <h2>Poptávkový formulář</h2>
+  <p>
+    Údaje z poptávkového formuláře (firma, kontaktní osoba, telefon, e-mail, adresa realizace, popis a příloha)
+    zpracováváme za účelem vyřízení poptávky a přípravy nabídky. Údaje předáme pouze středisku, které poptávku vyřizuje.
+  </p>
+  {/* TODO(klient/právník): doplnit dobu uchování údajů z poptávek a právní titul; ověřit soulad s PDF dokumentem. */}
+  <h2>Úplné informace</h2>
+  <p>
+    Všechna pravidla najdete v dokumentu <a href={pdf}>Informace a přístup (PDF)</a>.
+  </p>
+  <h2>Analytika a soubory cookies</h2>
+  <p>Web nepoužívá reklamní ani analytické cookies. Mapa Google se načte až po kliknutí na tlačítko „Zobrazit mapu“.</p>
+</SimplePage>

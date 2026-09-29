@@ -1,0 +1,76 @@
+---
+import { formatAddress, type Branch } from '../data/branches';
+import { telHref } from '../data/company';
+import Icon from './Icon.astro';
+interface Props {
+  branch: Branch;
+  headingLevel?: 'h2' | 'h3';
+}
+const { branch: b, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+
+<article class="branch">
+  <H class="branch__name"><a href={`/strediska/${b.slug}`}>{b.name}</a></H>
+  <p class="branch__region">{b.region}</p>
+  <address>
+    <span><Icon name="pin" size={18} />{formatAddress(b.office)}</span>
+    <a href={telHref(b.phone)}><Icon name="phone" size={18} />{b.phone}</a>
+    <a href={`mailto:${b.email}`}><Icon name="mail" size={18} />{b.email}</a>
+  </address>
+  <a class="branch__more" href={`/strediska/${b.slug}`}>Detail střediska<span class="visually-hidden"> {b.name}</span> →</a>
+</article>
+
+<style>
+  .branch {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-top: 4px solid var(--c-yellow);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    color: var(--c-text);
+    display: flex;
+    flex-direction: column;
+  }
+  .branch__name {
+    margin-bottom: var(--space-1);
+  }
+  .branch__name a {
+    color: var(--c-navy-800);
+    text-decoration: none;
+  }
+  .branch__region {
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-3);
+  }
+  address {
+    font-style: normal;
+    display: grid;
+    gap: var(--space-1);
+    margin-bottom: var(--space-4);
+    flex: 1;
+  }
+  address > * {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    overflow-wrap: anywhere;
+    color: var(--c-text);
+  }
+  address :global(svg) {
+    flex: none;
+    color: var(--c-navy-600);
+  }
+  address a {
+    color: var(--c-navy-600);
+  }
+  .branch__more {
+    font-weight: 700;
+    color: var(--c-navy-600);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

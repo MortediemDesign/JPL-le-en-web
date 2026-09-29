@@ -1,0 +1,64 @@
+---
+import type { Crumb } from '../lib/seo';
+import Breadcrumbs from './Breadcrumbs.astro';
+
+interface Props {
+  title: string;
+  lead?: string;
+  eyebrow?: string;
+  breadcrumbs: Crumb[];
+  /** Zobrazit CTA tlačítka (výchozí ano). */
+  cta?: boolean;
+  ctaHref?: string;
+}
+const { title, lead, eyebrow, breadcrumbs, cta = true, ctaHref = '/poptavka' } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="container">
+    <Breadcrumbs items={breadcrumbs} />
+    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+    <h1>{title}</h1>
+    {lead && <p class="page-hero__lead">{lead}</p>}
+    <slot />
+    {
+      cta && (
+        <div class="btn-row">
+          <a class="btn btn--primary btn--lg" href={ctaHref}>
+            Nezávazně poptat lešení
+          </a>
+          <a class="btn btn--light btn--lg" href="/reference">
+            Prohlédnout realizace
+          </a>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    background:
+      linear-gradient(135deg, rgb(7 26 51 / 0.97), rgb(19 49 92 / 0.94)),
+      repeating-linear-gradient(90deg, transparent 0 79px, rgb(245 183 0 / 0.08) 79px 81px),
+      repeating-linear-gradient(0deg, transparent 0 79px, rgb(255 255 255 / 0.04) 79px 81px);
+    color: #dbe4f0;
+    padding-block: var(--space-6) clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+  .page-hero h1 {
+    color: #fff;
+    max-width: 52rem;
+  }
+  .page-hero :global(.breadcrumbs a),
+  .page-hero :global(.breadcrumbs span) {
+    color: #c9d5e6;
+  }
+  .page-hero .eyebrow {
+    color: var(--c-yellow);
+  }
+  .page-hero__lead {
+    font-size: var(--fs-md);
+    max-width: 46rem;
+    margin-bottom: var(--space-6);
+  }
+</style>

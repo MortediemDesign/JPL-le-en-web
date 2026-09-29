@@ -1,0 +1,43 @@
+---
+import CtaBand from '../components/CtaBand.astro';
+import PageHero from '../components/PageHero.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { services } from '../data/services';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Služby', href: '/sluzby' },
+];
+---
+
+<BaseLayout
+  title="Služby – pronájem, montáž, prodej a návrh lešení | J.P.L. LEŠENÍ"
+  description="Přehled služeb J.P.L. LEŠENÍ: pronájem lešení, montáž a demontáž, prodej, technické návrhy a statika, průmyslové a prostorové lešení."
+  breadcrumbs={breadcrumbs}
+>
+  <PageHero
+    title="Služby"
+    lead="Lešení dodáváme jako kompletní službu – od zaměření a technického návrhu přes dopravu a montáž až po demontáž. Jednotlivé služby lze objednat i samostatně."
+    breadcrumbs={breadcrumbs}
+  />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">Přehled služeb</h2>
+      <div class="grid grid--3">
+        {services.map((s) => <ServiceCard href={`/${s.slug}`} title={s.title} text={s.lead} icon={s.icon} />)}
+      </div>
+    </div>
+  </section>
+  <section class="section section--navy" aria-labelledby="proc">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Postup</span>
+        <h2 id="proc">Jak probíhá zakázka</h2>
+      </div>
+      <ProcessSteps steps={services[0].process} />
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>

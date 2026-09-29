@@ -1,0 +1,44 @@
+---
+import BranchCard from '../../components/BranchCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { branches } from '../../data/branches';
+import { localBusinessLd } from '../../lib/seo';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Střediska', href: '/strediska' },
+];
+---
+
+<BaseLayout
+  title="Střediska – Praha, Plzeň, Karlovy Vary, Olomouc, Bratislava | J.P.L. LEŠENÍ"
+  description="Střediska J.P.L. LEŠENÍ v Praze, Plzni, Karlových Varech, Olomouci a Bratislavě. Adresy, telefony, e-maily a regiony působnosti."
+  breadcrumbs={breadcrumbs}
+  jsonLd={branches.map(localBusinessLd)}
+>
+  <PageHero
+    title="Střediska a regionální působnost"
+    lead="Čtyři střediska v České republice a pobočka v Bratislavě. Poptávku vždy vyřizuje středisko nejblíže vaší stavbě."
+    breadcrumbs={breadcrumbs}
+  />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">Seznam středisek</h2>
+      <div class="grid grid--3">
+        {branches.map((b) => <BranchCard branch={b} headingLevel="h3" />)}
+      </div>
+    </div>
+  </section>
+  <section class="section section--white" aria-labelledby="coverage">
+    <div class="container prose">
+      <h2 id="coverage">Kde působíme</h2>
+      <ul class="check-list">
+        {branches.map((b) => <li><strong>{b.name}</strong> – {b.region}</li>)}
+      </ul>
+      <p>Díky rozložení středisek zajišťujeme dodávky lešení po celé České republice.</p>
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>

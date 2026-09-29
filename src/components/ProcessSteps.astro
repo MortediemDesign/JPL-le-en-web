@@ -1,0 +1,53 @@
+---
+interface Props {
+  steps: { title: string; text: string }[];
+}
+const { steps } = Astro.props;
+---
+
+<ol class="steps">
+  {
+    steps.map((s, i) => (
+      <li class="step">
+        <span class="step__num" aria-hidden="true">
+          {String(i + 1).padStart(2, '0')}
+        </span>
+        <h3>{s.title}</h3>
+        <p>{s.text}</p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    counter-reset: step;
+  }
+  .step {
+    position: relative;
+    padding-top: var(--space-5);
+    border-top: 3px solid var(--c-yellow);
+  }
+  .step__num {
+    display: block;
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    color: var(--c-navy-600);
+    margin-bottom: var(--space-2);
+    line-height: 1;
+  }
+  :global(.section--navy) .step__num {
+    color: var(--c-yellow);
+  }
+  .step p {
+    margin: 0;
+    color: inherit;
+    opacity: 0.9;
+  }
+</style>

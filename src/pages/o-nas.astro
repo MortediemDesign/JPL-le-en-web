@@ -1,0 +1,265 @@
+---
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { company, facts, management, timeline } from '../data/company';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'O společnosti', href: '/o-nas' },
+];
+
+const values = [
+  {
+    icon: 'layers' as const,
+    title: 'Specializace na lešení',
+    text: 'Od založení se věnujeme prakticky jediné činnosti – montáži a pronájmu kompletních systémů lešení. Nerozmělňujeme aktivity a soustředíme se na kvalitu a efektivitu.',
+  },
+  {
+    icon: 'users' as const,
+    title: 'Vlastní odborný tým',
+    text: 'Montáž zajišťujeme z větší části vlastními zaměstnanci. Zavedený systém školení a kontrol kvality drží stejný standard na všech střediscích.',
+  },
+  {
+    icon: 'shield' as const,
+    title: 'Bezpečnost a kvalita',
+    text: 'Provádíme pravidelné kontroly jakosti a spolupracujeme s kontrolními a státními úřady. Dodržujeme bezpečnostní, ergonomické i funkční požadavky investora.',
+  },
+  {
+    icon: 'truck' as const,
+    title: 'Reinvestice do vybavení',
+    text: 'Zisk každoročně reinvestujeme do rozšíření půjčovny. Díky tomu jsme mohli otevřít další střediska a pokrýt celou republiku.',
+  },
+];
+---
+
+<BaseLayout
+  title="O společnosti – lešenářská firma od roku 1997 | J.P.L. LEŠENÍ"
+  description="J.P.L. LEŠENÍ s.r.o. vznikla v roce 1997. Specializujeme se na montáž a pronájem kompletních systémů lešení, máme čtyři střediska v ČR a od roku 2010 působíme na Slovensku."
+  breadcrumbs={breadcrumbs}
+>
+  <PageHero
+    title="O společnosti J.P.L. LEŠENÍ"
+    lead="Rodinná firma z Karlovarského kraje, která se od roku 1997 věnuje jen lešení. Dnes zajišťujeme pronájem, montáž a prodej lešení ze čtyř středisek v Česku a z Bratislavy."
+    breadcrumbs={breadcrumbs}
+  />
+
+  <section class="section section--white" aria-labelledby="facts-h">
+    <div class="container">
+      <h2 id="facts-h" class="visually-hidden">Fakta o společnosti</h2>
+      <dl class="stats">
+        {
+          facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hist">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Historie</span>
+        <h2 id="hist">Od karlovarského regionu po celou republiku</h2>
+      </div>
+      <ol class="timeline">
+        {
+          timeline.map((t) => (
+            <li>
+              <span class="timeline__year">{t.year}</span>
+              <div>
+                <h3>{t.title}</h3>
+                <p>{t.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="val">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Jak pracujeme</span>
+        <h2 id="val">Na čem stavíme</h2>
+      </div>
+      <div class="grid grid--2">
+        {
+          values.map((v) => (
+            <div class="value">
+              <Icon name={v.icon} size={28} />
+              <h3>{v.title}</h3>
+              <p>{v.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="team">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Tým a vybavení</span>
+        <h2 id="team">Lidé za lešením</h2>
+        <p class="lead">
+          „Naší hlavní snahou je vyjít vstříc požadavkům investora, za předpokladu dodržení všech podmínek nejen
+          bezpečnostních, ale také ergonomických a funkčních.“ — Pavel Ježek, ředitel společnosti
+        </p>
+      </div>
+      <div class="grid grid--3">
+        {
+          management.map((m) => (
+            <div class="card person">
+              <div class="person__photo" aria-hidden="true">
+                <Icon name="users" size={32} />
+              </div>
+              <h3>{m.name}</h3>
+              <p>{m.role}</p>
+              <a href={`mailto:${m.email}`}>{m.email}</a>
+            </div>
+          ))
+        }
+      </div>
+      <div class="todo-box media-todo">
+        {/* TODO(klient): dodat fotografie montážních týmů, techniků, skladů a vozového parku. */}
+        Připravené místo pro fotografie montážních týmů, skladů a techniky. Použijeme výhradně vlastní fotografie firmy.
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="legal">
+    <div class="container">
+      <h2 id="legal">Firemní údaje</h2>
+      <dl class="dl-grid">
+        <dt>Obchodní firma</dt><dd>{company.legalName}</dd>
+        <dt>Sídlo</dt><dd>{company.seat.street}, {company.seat.zip} {company.seat.city}</dd>
+        <dt>IČ</dt><dd>{company.ico}</dd>
+        <dt>DIČ</dt><dd>{company.dic}</dd>
+        <dt>Rejstřík</dt><dd>{company.registry}</dd>
+      </dl>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-5);
+    margin: 0;
+  }
+  .stats div {
+    display: flex;
+    flex-direction: column-reverse;
+    border-left: 3px solid var(--c-yellow);
+    padding-left: var(--space-4);
+  }
+  .stats dd {
+    margin: 0;
+    font-size: var(--fs-3xl);
+    font-weight: 800;
+    color: var(--c-navy-800);
+  }
+  .stats dt {
+    color: var(--c-muted);
+  }
+  .timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    display: grid;
+    gap: var(--space-5);
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--c-yellow);
+  }
+  .timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: var(--space-4);
+  }
+  .timeline__year {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--c-navy-800);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .timeline h3 {
+    margin: 0.6rem 0 var(--space-2);
+  }
+  .timeline p {
+    margin: 0;
+    max-width: 44rem;
+  }
+  @media (min-width: 768px) {
+    .timeline::before {
+      left: 2.5rem;
+    }
+    .timeline li {
+      grid-template-columns: 5rem 1fr;
+    }
+    .timeline__year {
+      width: 5rem;
+      height: 5rem;
+      font-size: 1rem;
+    }
+    .timeline h3 {
+      margin-top: 1.5rem;
+    }
+  }
+  .value {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--c-bg);
+  }
+  .value :global(svg) {
+    color: var(--c-navy-600);
+    margin-bottom: var(--space-3);
+  }
+  .person__photo {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: var(--c-navy-100);
+    color: var(--c-navy-600);
+    margin-bottom: var(--space-3);
+  }
+  .person p {
+    color: var(--c-muted);
+    margin-bottom: var(--space-2);
+  }
+  .person a {
+    overflow-wrap: anywhere;
+  }
+  .media-todo {
+    margin-top: var(--space-6);
+  }
+</style>

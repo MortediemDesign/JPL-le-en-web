@@ -1,0 +1,103 @@
+---
+import type { Reference } from '../data/references';
+import Photo from './Photo.astro';
+
+interface Props {
+  reference: Reference;
+  headingLevel?: 'h2' | 'h3';
+  eager?: boolean;
+}
+const { reference: r, headingLevel = 'h3', eager = false } = Astro.props;
+const H = headingLevel;
+const meta = [r.location, r.year].filter(Boolean).join(' · ');
+---
+
+<article class="ref-card">
+  <Photo oid={r.photos[0].oid} alt={r.photos[0].alt} eager={eager} />
+  <div class="ref-card__body">
+    <p class="ref-card__type">{r.objectType}</p>
+    <H class="ref-card__title">
+      <a href={`/reference/${r.slug}`}>{r.title}</a>
+    </H>
+    {meta && <p class="ref-card__meta">{meta}</p>}
+    {
+      (r.area || r.scaffolding) && (
+        <ul class="ref-card__tags">
+          {r.area && <li>{r.area}</li>}
+          {r.scaffolding?.slice(0, 2).map((s) => <li>{s}</li>)}
+        </ul>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .ref-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .ref-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .ref-card :global(.photo) {
+    border-radius: 0;
+  }
+  .ref-card__body {
+    padding: var(--space-5);
+  }
+  .ref-card__type {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--c-navy-600);
+    margin-bottom: var(--space-2);
+  }
+  .ref-card__title {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--space-2);
+  }
+  .ref-card__title a {
+    color: var(--c-navy-800);
+    text-decoration: none;
+  }
+  /* celá karta klikací */
+  .ref-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .ref-card__title a:focus-visible {
+    box-shadow: none;
+  }
+  .ref-card:focus-within {
+    box-shadow: var(--focus);
+  }
+  .ref-card__meta {
+    color: var(--c-muted);
+    margin-bottom: var(--space-3);
+  }
+  .ref-card__tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    margin: 0;
+  }
+  .ref-card__tags li {
+    font-size: var(--fs-sm);
+    background: var(--c-navy-100);
+    color: var(--c-navy-800);
+    padding: 0.125rem 0.625rem;
+    border-radius: 999px;
+  }
+</style>

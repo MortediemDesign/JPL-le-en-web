@@ -1,0 +1,57 @@
+---
+import { facts } from '../data/company';
+interface Props {
+  variant?: 'hero' | 'section';
+}
+const { variant = 'section' } = Astro.props;
+---
+
+<dl class:list={['facts', `facts--${variant}`]}>
+  {
+    facts.map((f) => (
+      <div class="fact" data-verify={f.verify ? 'true' : undefined}>
+        <dt>{f.label}</dt>
+        <dd>{f.value}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    .facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .fact {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-1);
+    border-left: 3px solid var(--c-yellow);
+    padding-left: var(--space-4);
+  }
+  dd {
+    margin: 0;
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--c-navy-800);
+    white-space: nowrap;
+  }
+  dt {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+  .facts--hero dd {
+    color: #fff;
+  }
+  .facts--hero dt {
+    color: #c9d5e6;
+  }
+</style>

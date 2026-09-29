@@ -1,0 +1,182 @@
+---
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import MapEmbed from '../../components/MapEmbed.astro';
+import PageHero from '../../components/PageHero.astro';
+import ReferenceCard from '../../components/ReferenceCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { branches, formatAddress, type Branch } from '../../data/branches';
+import { telHref } from '../../data/company';
+import { references } from '../../data/references';
+import { services } from '../../data/services';
+import { localBusinessLd } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return branches.map((b) => ({ params: { slug: b.slug }, props: { b } }));
+}
+const { b } = Astro.props as { b: Branch };
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Střediska', href: '/strediska' },
+  { label: b.name, href: `/strediska/${b.slug}` },
+];
+const cityWords = b.slug === 'slovensko' ? ['Bratislava'] : [b.name.split(' ')[0]];
+const localRefs = references.filter((r) => cityWords.some((c) => r.location?.includes(c))).slice(0, 3);
+const isSk = b.office.country === 'SK';
+const title = isSk ? 'Lešení na Slovensku – J.P.L. LEŠENIE, Bratislava' : `Lešení ${b.name} – pronájem a montáž`;
+---
+
+<BaseLayout
+  title={`${title} | J.P.L. LEŠENÍ`}
+  description={`Středisko ${b.name}: pronájem, montáž a demontáž lešení – ${b.region}. ${formatAddress(b.office)}, tel. ${b.phone}.`.slice(0, 160)}
+  breadcrumbs={breadcrumbs}
+  jsonLd={[localBusinessLd(b)]}
+>
+  <PageHero
+    title={isSk ? 'Lešení na Slovensku – středisko Bratislava' : `Pronájem a montáž lešení ${b.locative}`}
+    lead={b.intro}
+    eyebrow={`Středisko ${b.name}`}
+    breadcrumbs={breadcrumbs}
+    ctaHref={`/poptavka?stredisko=${b.id}`}
+  />
+
+  <section class="section section--white">
+    <div class="container two-col">
+      <div>
+        <h2>Kontakt na středisko</h2>
+        <div class="contact">
+          <div>
+            <h3>Kancelář</h3>
+            <address>
+              {b.company && <strong>{b.company.name}</strong>}
+              {b.office.note && <span>{b.office.note}</span>}
+              <span>{b.office.street}</span>
+              <span>{b.office.zip} {b.office.city}</span>
+            </address>
+          </div>
+          {
+            b.yard && (
+              <div>
+                <h3>Sklad lešení</h3>
+                <address>
+                  {b.yard.note && <span>{b.yard.note}</span>}
+                  <span>{b.yard.street}</span>
+                  <span>
+                    {b.yard.zip} {b.yard.city}
+                  </span>
+                </address>
+              </div>
+            )
+          }
+          <div>
+            <h3>Telefon a e-mail</h3>
+            <p class="links">
+              <a href={telHref(b.phone)}><Icon name="phone" size={18} />{b.phone}</a>
+              {b.mobile && b.mobile !== b.phone && <a href={telHref(b.mobile)}><Icon name="phone" size={18} />{b.mobile} (mobil)</a>}
+              <a href={`mailto:${b.email}`}><Icon name="mail" size={18} />{b.email}</a>
+            </p>
+          </div>
+          {
+            b.company && (
+              <div>
+                <h3>Fakturační údaje</h3>
+                <p>
+                  IČ: {b.company.ico}
+                  <br />
+                  DIČ: {b.company.dic}
+                  <br />
+                  E-mail: <a href={`mailto:${b.company.email}`}>{b.company.email}</a>
+                </p>
+              </div>
+            )
+          }
+        </div>
+        <h2 class="svc-h">Služby střediska</h2>
+        <ul class="svc">
+          {services.map((s) => <li><a href={`/${s.slug}`}>{s.title}</a></li>)}
+        </ul>
+        <p>Působnost: {b.areas.join(', ')}.</p>
+      </div>
+      <MapEmbed query={b.mapQuery} title={`Mapa – středisko ${b.name}`} />
+    </div>
+  </section>
+
+  {
+    localRefs.length > 0 && (
+      <section class="section" aria-labelledby="loc-refs">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="loc-refs">Reference z regionu</h2>
+          </div>
+          <div class="grid grid--3">
+            {localRefs.map((r) => (
+              <ReferenceCard reference={r} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section section--white" aria-labelledby="others">
+    <div class="container">
+      <h2 id="others" class="others-h">Další střediska</h2>
+      <ul class="others">
+        {branches.filter((x) => x.slug !== b.slug).map((x) => <li><a href={`/strediska/${x.slug}`}>{x.name}</a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand href={`/poptavka?stredisko=${b.id}`} />
+</BaseLayout>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    margin-bottom: var(--space-6);
+  }
+  .contact h3 {
+    font-size: var(--fs-base);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--c-muted);
+    margin-bottom: var(--space-2);
+  }
+  address {
+    font-style: normal;
+    display: grid;
+  }
+  .links {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 40px;
+    overflow-wrap: anywhere;
+  }
+  .svc-h,
+  .others-h {
+    font-size: var(--fs-xl);
+  }
+  .svc,
+  .others {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+  .svc a,
+  .others a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-weight: 700;
+  }
+</style>

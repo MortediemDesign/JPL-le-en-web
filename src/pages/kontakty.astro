@@ -1,0 +1,113 @@
+---
+import BranchCard from '../components/BranchCard.astro';
+import Icon from '../components/Icon.astro';
+import InquiryForm from '../components/InquiryForm.astro';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { branches } from '../data/branches';
+import { company, management, telHref } from '../data/company';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Kontakty', href: '/kontakty' },
+];
+---
+
+<BaseLayout
+  title="Kontakty | J.P.L. LEŠENÍ"
+  description={`Kontakty J.P.L. LEŠENÍ s.r.o.: centrála ${company.phone}, ${company.email}. Sídlo ${company.seat.street}, ${company.seat.city}. Střediska Praha, Plzeň, Karlovy Vary, Olomouc, Bratislava.`}
+  breadcrumbs={breadcrumbs}
+>
+  <PageHero
+    title="Kontakty"
+    lead="Napište nebo zavolejte. Poptávku předáme středisku nejblíže vaší stavbě."
+    breadcrumbs={breadcrumbs}
+    cta={false}
+  >
+    <p class="hero-contacts">
+      <a href={telHref(company.phone)}><Icon name="phone" size={22} />{company.phone}</a>
+      <a href={`mailto:${company.email}`}><Icon name="mail" size={22} />{company.email}</a>
+    </p>
+  </PageHero>
+
+  <section class="section section--white">
+    <div class="container two-col">
+      <div>
+        <h2>Sídlo společnosti</h2>
+        <address class="seat">
+          <strong>{company.legalName}</strong>
+          <span>{company.seat.street}, {company.seat.zip} {company.seat.city}</span>
+          <span>IČ {company.ico}, DIČ {company.dic}</span>
+          <span>{company.registry}</span>
+        </address>
+        <h2>Vedení společnosti</h2>
+        <ul class="people">
+          {
+            management.map((m) => (
+              <li>
+                <strong>{m.name}</strong>
+                <span class="people__role">{m.role}</span>
+                {'phone' in m && m.phone && <a href={telHref(m.phone)}>{m.phone}</a>}
+                <a href={`mailto:${m.email}`}>{m.email}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="card" id="poptavka">
+        <h2 id="kontakt-form">Poptávka</h2>
+        <InquiryForm headingId="kontakt-form" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="strediska">
+    <div class="container">
+      <h2 id="strediska">Střediska</h2>
+      <div class="grid grid--3">
+        {branches.map((b) => <BranchCard branch={b} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+  }
+  .hero-contacts a {
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    overflow-wrap: anywhere;
+  }
+  .seat {
+    font-style: normal;
+    display: grid;
+    margin-bottom: var(--space-6);
+  }
+  .people {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .people li {
+    display: grid;
+  }
+  .people__role {
+    color: var(--c-muted);
+  }
+  .people a {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    overflow-wrap: anywhere;
+  }
+</style>

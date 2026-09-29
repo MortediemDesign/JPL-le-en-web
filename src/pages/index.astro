@@ -1,0 +1,360 @@
+---
+import BranchCard from '../components/BranchCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import FaqList from '../components/FaqList.astro';
+import Icon from '../components/Icon.astro';
+import Photo from '../components/Photo.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import ReferenceCard from '../components/ReferenceCard.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { branches } from '../data/branches';
+import { company, facts, timeline } from '../data/company';
+import { homeFaq } from '../data/faq';
+import { references } from '../data/references';
+import { scaffoldTypes } from '../data/scaffoldTypes';
+import { services } from '../data/services';
+import { photoSrc, photoSrcset } from '../lib/images';
+import { faqLd } from '../lib/seo';
+
+const HERO_OID = 6735936; // Staroměstská radnice Praha – skutečná realizace
+const heroSizes = '(min-width: 960px) 45vw, 100vw';
+const featured = references.filter((r) => r.featured).slice(0, 6);
+const cz = branches.filter((b) => b.office.country === 'CZ');
+const sk = branches.find((b) => b.slug === 'slovensko')!;
+
+const process = [
+  { title: 'Poptávka', text: 'Pošlete adresu stavby, rozsah a termín – formulářem, e-mailem nebo telefonicky.' },
+  { title: 'Prohlídka zdarma', text: 'Technik stavbu zaměří na místě a převezme dokumentaci.' },
+  { title: 'Návrh a nabídka', text: 'Technický návrh, u složitých konstrukcí projekt a statika. Nabídka s termínem montáže.' },
+  { title: 'Montáž a předání', text: 'Doprava, montáž vlastními montážníky a protokolární předání.' },
+  { title: 'Demontáž', text: 'Po skončení prací lešení rozebereme, odvezeme a protokolárně převezmeme.' },
+];
+---
+
+<BaseLayout
+  title="Pronájem a montáž lešení | J.P.L. LEŠENÍ – od roku 1997"
+  description="Pronájem, montáž a prodej lešení PERI UP, HAKI a trubkového lešení. Technický návrh, doprava, montáž i demontáž. Střediska Praha, Plzeň, Karlovy Vary, Olomouc a Bratislava."
+  canonicalPath="/"
+  preloadImage={{ href: photoSrc(HERO_OID, 800), srcset: photoSrcset(HERO_OID), sizes: heroSizes }}
+  jsonLd={[faqLd(homeFaq)]}
+>
+  <!-- 1. Hero -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <span class="eyebrow">Lešení od roku {company.foundingYear}</span>
+        <h1>Pronájem a montáž lešení pro stavby všech velikostí</h1>
+        <p class="hero__lead">
+          Kompletní lešenářská řešení od technického návrhu přes dopravu a odbornou montáž až po demontáž. Pro stavební
+          firmy, průmyslové provozy i náročné rekonstrukce.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary btn--lg" href="/poptavka">Nezávazně poptat lešení</a>
+          <a class="btn btn--light btn--lg" href="/reference">Prohlédnout realizace</a>
+        </div>
+        <ul class="hero__points">
+          <li><Icon name="check" size={18} />Prohlídka a nabídka zdarma</li>
+          <li><Icon name="check" size={18} />Vlastní doprava a montážníci</li>
+          <li><Icon name="check" size={18} />Celá ČR a Slovensko</li>
+        </ul>
+      </div>
+      <figure class="hero__media">
+        <Photo oid={HERO_OID} alt="Lešení na Staroměstské radnici v Praze – realizace J.P.L. LEŠENÍ" eager sizes={heroSizes} ratio="4 / 3" />
+        <figcaption>Staroměstská radnice Praha · 5 900 m² · 2017–2018</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. Fakta -->
+  <section class="facts" aria-labelledby="facts-title">
+    <h2 id="facts-title" class="visually-hidden">J.P.L. LEŠENÍ v číslech</h2>
+    <div class="container">
+      <dl class="facts__list">
+        {
+          facts.map((f) => (
+            <div class="facts__item">
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- 3. Služby -->
+  <section class="section" aria-labelledby="svc-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Služby</span>
+        <h2 id="svc-title">Lešení jako kompletní služba</h2>
+        <p class="lead">
+          Pronájem je naší hlavní činností. Zajistíme ale celý proces – od návrhu a statického posouzení přes dopravu až po
+          demontáž. Nemusíte koordinovat další dodavatele.
+        </p>
+      </div>
+      <div class="grid grid--3">
+        {services.map((s) => <ServiceCard href={`/${s.slug}`} title={s.title} text={s.lead} icon={s.icon} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Typy lešení -->
+  <section class="section section--white" aria-labelledby="types-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Typy lešení</span>
+        <h2 id="types-title">Systém volíme podle stavby, ne podle skladu</h2>
+        <p class="lead">V půjčovně máme tři lešenářské systémy. Technik doporučí ten, který odpovídá tvaru objektu, zatížení a přístupu.</p>
+      </div>
+      <div class="grid grid--3">
+        {
+          scaffoldTypes.map((t) => (
+            <article class="type-card">
+              <Icon name="layers" size={28} />
+              <h3>
+                <a href={`/${t.slug}`}>{t.name}</a>
+              </h3>
+              <p>{t.short}</p>
+              <ul class="check-list">
+                {t.suitableFor.map((s) => (
+                  <li>{s}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Proces -->
+  <section class="section section--navy" aria-labelledby="proc-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Jak spolupracujeme</span>
+        <h2 id="proc-title">Od poptávky po demontáž v pěti krocích</h2>
+        <p class="lead">Za celou akci odpovídá jeden technik. Víte, s kým mluvit – od zaměření až po převzetí lešení.</p>
+      </div>
+      <ProcessSteps steps={process} />
+    </div>
+  </section>
+
+  <!-- 6. Reference -->
+  <section class="section" aria-labelledby="ref-title">
+    <div class="container">
+      <div class="section-head ref-head">
+        <div>
+          <span class="eyebrow">Reference</span>
+          <h2 id="ref-title">Lešení na památkách, bytových domech i infrastruktuře</h2>
+        </div>
+        <a class="btn btn--secondary" href="/reference">Všechny reference</a>
+      </div>
+      <div class="grid grid--3">
+        {featured.map((r) => <ReferenceCard reference={r} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Regionální působnost -->
+  <section class="section section--white" aria-labelledby="reg-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Střediska</span>
+        <h2 id="reg-title">Čtyři střediska v ČR, pobočka v Bratislavě</h2>
+        <p class="lead">
+          Díky rozložení středisek zajišťujeme lešení po celé České republice. Na Slovensku působíme od roku 2010
+          prostřednictvím {sk.company?.name}.
+        </p>
+      </div>
+      <div class="grid grid--3">
+        {cz.map((b) => <BranchCard branch={b} />)}
+        <BranchCard branch={sk} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. O společnosti -->
+  <section class="section" aria-labelledby="about-title">
+    <div class="container two-col">
+      <div>
+        <span class="eyebrow">O společnosti</span>
+        <h2 id="about-title">Rodinná firma, která se věnuje jen lešení</h2>
+        <p class="lead">
+          J.P.L. LEŠENÍ s.r.o. vznikla v roce 1997 v Karlovarském kraji. Od začátku se soustředíme na jedinou činnost –
+          montáž a pronájem kompletních systémů lešení – a zisk každoročně reinvestujeme do vybavení.
+        </p>
+        <p>
+          Montáž zajišťujeme převážně vlastními zaměstnanci, kteří pravidelně procházejí školením. Kvalitu prací
+          kontrolujeme a dbáme na bezpečnostní, ergonomické i funkční požadavky investora.
+        </p>
+        <a class="btn btn--secondary" href="/o-nas">Více o společnosti</a>
+      </div>
+      <ol class="mini-timeline" aria-label="Milníky společnosti">
+        {
+          timeline.slice(0, 4).map((t) => (
+            <li>
+              <strong>{t.year}</strong> {t.title}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 9. FAQ -->
+  <FaqList items={homeFaq} />
+
+  <!-- 10. CTA -->
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .hero {
+    background:
+      linear-gradient(135deg, rgb(7 26 51 / 0.98), rgb(19 49 92 / 0.95)),
+      repeating-linear-gradient(90deg, transparent 0 79px, rgb(245 183 0 / 0.1) 79px 81px);
+    color: #dbe4f0;
+    padding-block: clamp(2.5rem, 2rem + 4vw, 5.5rem);
+  }
+  .hero__inner {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero__inner {
+      grid-template-columns: 1.1fr 1fr;
+    }
+  }
+  .hero h1 {
+    color: #fff;
+  }
+  .hero .eyebrow {
+    color: var(--c-yellow);
+  }
+  .hero__lead {
+    font-size: var(--fs-md);
+    max-width: 38rem;
+    margin-bottom: var(--space-6);
+  }
+  .hero__points {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-6) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    font-size: var(--fs-sm);
+  }
+  .hero__points li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .hero__points :global(svg) {
+    color: var(--c-yellow);
+  }
+  .hero__media {
+    margin: 0;
+  }
+  .hero__media :global(.photo) {
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.35);
+    outline: 4px solid var(--c-yellow);
+    outline-offset: 8px;
+  }
+  .hero__media figcaption {
+    font-size: var(--fs-sm);
+    margin-top: var(--space-5);
+    color: #c9d5e6;
+  }
+
+  .facts {
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .facts__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    margin: 0;
+  }
+  .facts__item {
+    display: flex;
+    flex-direction: column-reverse;
+    padding: var(--space-6) var(--space-4);
+    border-left: 3px solid var(--c-yellow);
+  }
+  .facts__item dd {
+    margin: 0;
+    font-size: var(--fs-3xl);
+    font-weight: 800;
+    color: var(--c-navy-800);
+    line-height: 1.1;
+  }
+  .facts__item dt {
+    color: var(--c-muted);
+    margin-top: var(--space-1);
+  }
+
+  .type-card {
+    background: var(--c-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    color: var(--c-navy-800);
+  }
+  .type-card h3 {
+    margin-top: var(--space-3);
+    font-size: var(--fs-xl);
+  }
+  .type-card h3 a {
+    color: var(--c-navy-800);
+  }
+  .type-card p {
+    color: var(--c-muted);
+  }
+  .type-card .check-list {
+    color: var(--c-text);
+  }
+
+  .ref-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--space-4);
+    max-width: none;
+  }
+  .ref-head h2 {
+    max-width: 40rem;
+    margin: 0;
+  }
+
+  .mini-timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 3px solid var(--c-yellow);
+  }
+  .mini-timeline li {
+    padding: var(--space-3) 0 var(--space-3) var(--space-5);
+    position: relative;
+    font-size: var(--fs-md);
+  }
+  .mini-timeline li::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 1.15rem;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--c-navy-800);
+    border: 3px solid var(--c-yellow);
+  }
+  .mini-timeline strong {
+    display: inline-block;
+    min-width: 3.5rem;
+    color: var(--c-navy-800);
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { company, telHref } from '../data/company';
+---
+
+<BaseLayout title="Stránka nenalezena | J.P.L. LEŠENÍ" description="Požadovaná stránka neexistuje." noindex>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Chyba 404</p>
+      <h1>Tuto stránku jsme nenašli</h1>
+      <p class="lead">
+        Stránka mohla být přesunuta při obnově webu. Zkuste některý z odkazů níže, nebo nám rovnou zavolejte na
+        <a href={telHref(company.phone)}>{company.phone}</a>.
+      </p>
+      <ul class="check-list">
+        <li><a href="/pronajem-leseni">Pronájem lešení</a></li>
+        <li><a href="/typy-leseni">Typy lešení</a></li>
+        <li><a href="/reference">Reference</a></li>
+        <li><a href="/strediska">Střediska a kontakty</a></li>
+      </ul>
+      <p class="btn-row" style="margin-top:2rem">
+        <a class="btn btn--primary" href="/poptavka">Nezávazně poptat lešení</a>
+        <a class="btn btn--secondary" href="/">Úvodní stránka</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>

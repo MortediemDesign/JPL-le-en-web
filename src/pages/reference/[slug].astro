@@ -1,0 +1,212 @@
+---
+import CtaBand from '../../components/CtaBand.astro';
+import PageHero from '../../components/PageHero.astro';
+import Photo from '../../components/Photo.astro';
+import ReferenceCard from '../../components/ReferenceCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { references, type Reference } from '../../data/references';
+import { photoSrc } from '../../lib/images';
+
+export function getStaticPaths() {
+  return references.map((r) => ({ params: { slug: r.slug }, props: { r } }));
+}
+const { r } = Astro.props as { r: Reference };
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Reference', href: '/reference' },
+  { label: r.title, href: `/reference/${r.slug}` },
+];
+const facts = [
+  ['Typ objektu', r.objectType],
+  ['Lokalita', r.location],
+  ['Realizace', r.year],
+  ['Zadavatel stavby', r.client],
+  ['Objem lešení', r.area],
+].filter(([, v]) => Boolean(v)) as [string, string][];
+
+const others = references.filter((x) => x.slug !== r.slug).slice(0, 3);
+const description = `${r.summary} ${[r.location, r.year, r.area].filter(Boolean).join(', ')}. Realizace J.P.L. LEŠENÍ.`.slice(0, 160);
+---
+
+<BaseLayout
+  title={`${r.shortTitle ?? r.title} – reference | J.P.L. LEŠENÍ`}
+  description={description}
+  breadcrumbs={breadcrumbs}
+  ogImage={photoSrc(r.photos[0].oid, 1200)}
+  ogType="article"
+>
+  <PageHero title={r.title} lead={r.summary} eyebrow="Reference" breadcrumbs={breadcrumbs} cta={false} />
+
+  <section class="section section--white">
+    <div class="container two-col">
+      <div>
+        <h2 class="visually-hidden">Fotografie</h2>
+        <ul class="gallery" role="list">
+          {
+            r.photos.map((p, i) => (
+              <li class:list={{ 'gallery__wide': i === 0 }}>
+                <button type="button" class="gallery__btn" data-full={photoSrc(p.oid, 1200)} data-alt={p.alt}>
+                  <span class="visually-hidden">Zvětšit fotografii: </span>
+                  <Photo oid={p.oid} alt={p.alt} eager={i === 0} ratio={i === 0 ? '4 / 3' : p.portrait ? '3 / 4' : '4 / 3'} sizes={i === 0 ? '(min-width: 960px) 55vw, 100vw' : '(min-width: 960px) 27vw, 50vw'} />
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <aside class="side">
+        <div class="card">
+          <h2 class="side__h">Parametry zakázky</h2>
+          <dl class="dl-grid">
+            {
+              facts.map(([k, v]) => (
+                <>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </>
+              ))
+            }
+          </dl>
+          {
+            r.scaffolding && (
+              <>
+                <h3 class="side__h3">Řešení lešení</h3>
+                <ul class="check-list">
+                  {r.scaffolding.map((s) => (
+                    <li>{s}</li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+        </div>
+        <div class="card side__cta">
+          <h2 class="side__h">Připravujete podobnou zakázku?</h2>
+          <p>Technik stavbu zaměří a připraví nabídku zdarma.</p>
+          <a class="btn btn--primary" href="/poptavka">Nezávazně poptat lešení</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="more">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="more">Další reference</h2>
+      </div>
+      <div class="grid grid--3">
+        {others.map((o) => <ReferenceCard reference={o} />)}
+      </div>
+      <p class="back"><a href="/reference">← Zpět na všechny reference</a></p>
+    </div>
+  </section>
+
+  <CtaBand />
+
+  <dialog class="lightbox" aria-label="Fotografie" data-lightbox>
+    <form method="dialog"><button class="lightbox__close" aria-label="Zavřít">×</button></form>
+    <img alt="" data-lightbox-img />
+    <p data-lightbox-cap></p>
+  </dialog>
+</BaseLayout>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const img = document.querySelector<HTMLImageElement>('[data-lightbox-img]');
+  const cap = document.querySelector<HTMLElement>('[data-lightbox-cap]');
+  document.querySelectorAll<HTMLButtonElement>('.gallery__btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (!dlg || !img || !cap) return;
+      img.src = b.dataset.full!;
+      img.alt = b.dataset.alt ?? '';
+      cap.textContent = b.dataset.alt ?? '';
+      dlg.showModal();
+    }),
+  );
+  dlg?.addEventListener('click', (e) => {
+    if (e.target === dlg) dlg.close();
+  });
+</script>
+
+<style>
+  .gallery {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+  .gallery__wide {
+    grid-column: 1 / -1;
+  }
+  .gallery__btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    border-radius: var(--radius-lg);
+  }
+  .side {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .side__h {
+    font-size: var(--fs-lg);
+  }
+  .side__h3 {
+    font-size: var(--fs-base);
+    margin-top: var(--space-5);
+  }
+  .side__cta {
+    background: var(--c-navy-800);
+    color: #dbe4f0;
+    border: 0;
+  }
+  .side__cta h2 {
+    color: #fff;
+  }
+  .back {
+    margin-top: var(--space-6);
+  }
+  .lightbox {
+    border: 0;
+    padding: var(--space-4);
+    background: var(--c-navy-900);
+    color: #fff;
+    max-width: min(96vw, 1200px);
+    max-height: 94vh;
+    border-radius: var(--radius-lg);
+  }
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.8);
+  }
+  .lightbox img {
+    max-height: 80vh;
+    width: auto;
+    margin: 0 auto;
+  }
+  .lightbox p {
+    margin: var(--space-3) 0 0;
+    text-align: center;
+  }
+  .lightbox__close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--c-yellow);
+    color: var(--c-navy-900);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+</style>

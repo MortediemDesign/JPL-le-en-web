@@ -1,0 +1,45 @@
+---
+import SimplePage from '../layouts/SimplePage.astro';
+import { mainNav } from '../data/navigation';
+import { references } from '../data/references';
+---
+
+<SimplePage
+  title="Mapa stránek"
+  seoTitle="Mapa stránek | J.P.L. LEŠENÍ"
+  description="Přehled všech stránek webu J.P.L. LEŠENÍ – služby, typy lešení, reference, střediska a kontakty."
+>
+  <ul>
+    <li><a href="/">Úvod</a></li>
+    <li><a href="/poptavka">Poptávka lešení</a></li>
+    {
+      mainNav.map((n) => (
+        <li>
+          <a href={n.href}>{n.label}</a>
+          {n.children && (
+            <ul>
+              {n.children.map((c) => (
+                <li>
+                  <a href={c.href}>{c.label}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+          {n.href === '/reference' && (
+            <ul>
+              {references.map((r) => (
+                <li>
+                  <a href={`/reference/${r.slug}`}>{r.title}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))
+    }
+    <li><a href="/kariera">Kariéra</a></li>
+    <li><a href="/gdpr">Ochrana osobních údajů</a></li>
+    <li><a href="/prohlaseni-o-pristupnosti">Prohlášení o přístupnosti</a></li>
+    <li><a href="/dotacni-program-up-a-eu">Dotační program ÚP a EU</a></li>
+  </ul>
+</SimplePage>

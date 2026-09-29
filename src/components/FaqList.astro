@@ -1,0 +1,79 @@
+---
+import type { FaqItem } from '../data/faq';
+interface Props {
+  items: FaqItem[];
+  title?: string;
+  headingId?: string;
+}
+const { items, title = 'Časté dotazy', headingId = 'faq' } = Astro.props;
+---
+
+<section class="section section--white" aria-labelledby={headingId}>
+  <div class="container faq">
+    <div class="section-head">
+      <span class="eyebrow">FAQ</span>
+      <h2 id={headingId}>{title}</h2>
+    </div>
+    <div class="faq__list">
+      {
+        items.map((f) => (
+          <details class="faq__item">
+            <summary>
+              <h3>{f.q}</h3>
+            </summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq__list {
+    max-width: 52rem;
+    border-top: 1px solid var(--c-border);
+  }
+  .faq__item {
+    border-bottom: 1px solid var(--c-border);
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    min-height: 56px;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary h3 {
+    margin: 0;
+    font-size: var(--fs-md);
+  }
+  summary::after {
+    content: '+';
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--c-navy-100);
+    color: var(--c-navy-800);
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  details[open] summary::after {
+    content: '−';
+    background: var(--c-yellow);
+  }
+  details p {
+    max-width: 46rem;
+    color: var(--c-muted);
+    padding-bottom: var(--space-3);
+  }
+</style>

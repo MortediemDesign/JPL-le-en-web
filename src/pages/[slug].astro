@@ -1,0 +1,274 @@
+---
+/** Stránky služeb (/pronajem-leseni …) a typů lešení (/peri-leseni …) – zachované URL. */
+import CtaBand from '../components/CtaBand.astro';
+import FaqList from '../components/FaqList.astro';
+import PageHero from '../components/PageHero.astro';
+import Photo from '../components/Photo.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import ReferenceCard from '../components/ReferenceCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { referenceBySlug, type Reference } from '../data/references';
+import { scaffoldTypes, type ScaffoldType } from '../data/scaffoldTypes';
+import { services, type Service } from '../data/services';
+import { faqLd, serviceLd } from '../lib/seo';
+
+export function getStaticPaths() {
+  return [
+    ...services.map((s) => ({ params: { slug: s.slug }, props: { kind: 'service' as const, service: s } })),
+    ...scaffoldTypes.map((t) => ({ params: { slug: t.slug }, props: { kind: 'type' as const, type: t } })),
+  ];
+}
+
+type Props = { kind: 'service'; service: Service } | { kind: 'type'; type: ScaffoldType };
+const props = Astro.props;
+
+const isService = props.kind === 'service';
+const s = isService ? props.service : undefined;
+const t = !isService ? props.type : undefined;
+const page = (s ?? t)!;
+const path = `/${page.slug}`;
+
+const refs = page.referenceSlugs.map(referenceBySlug).filter(Boolean) as Reference[];
+const photoRef = refs.find((r) => r.photos.length > 1) ?? refs[0];
+
+const breadcrumbs = isService
+  ? [
+      { label: 'Úvod', href: '/' },
+      { label: 'Služby', href: '/sluzby' },
+      { label: s!.title, href: path },
+    ]
+  : [
+      { label: 'Úvod', href: '/' },
+      { label: 'Typy lešení', href: '/typy-leseni' },
+      { label: t!.name, href: path },
+    ];
+
+const jsonLd = [
+  serviceLd({
+    name: s ? s.title : `Pronájem a montáž lešení ${t!.name}`,
+    description: page.description,
+    path,
+    serviceType: s ? s.title : 'Pronájem lešení',
+  }),
+  faqLd(page.faq),
+];
+
+const preset = s ? `?sluzba=${s.id}` : '?sluzba=pronajem';
+const related = isService ? scaffoldTypes : services.filter((x) => ['pronajem', 'montaz', 'navrh'].includes(x.id));
+---
+
+<BaseLayout title={page.seoTitle} description={page.description} breadcrumbs={breadcrumbs} jsonLd={jsonLd}>
+  <PageHero
+    title={page.h1}
+    lead={page.lead}
+    eyebrow={isService ? 'Služby' : 'Typy lešení'}
+    breadcrumbs={breadcrumbs}
+    ctaHref={`/poptavka${preset}`}
+  />
+
+  <section class="section section--white">
+    <div class="container two-col">
+      <div class="prose">
+        <h2>{isService ? `Co zahrnuje ${s!.title.toLowerCase()}` : `Vlastnosti systému ${t!.name}`}</h2>
+        {s?.intro.map((p) => <p>{p}</p>)}
+        {
+          t && (
+            <div class="features">
+              {t.features.map((f) => (
+                <div class="feature">
+                  <h3>{f.title}</h3>
+                  <p>{f.text}</p>
+                </div>
+              ))}
+            </div>
+          )
+        }
+        {
+          t?.components && (
+            <>
+              <h3>Skladba systému</h3>
+              <ul class="check-list">
+                {t.components.map((c) => (
+                  <li>{c}</li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+      </div>
+
+      <aside class="side">
+        {
+          photoRef ? (
+            <figure class="side__photo">
+              <Photo oid={photoRef.photos[0].oid} alt={photoRef.photos[0].alt} sizes="(min-width: 960px) 40vw, 100vw" />
+              <figcaption>
+                Realizace: <a href={`/reference/${photoRef.slug}`}>{photoRef.title}</a>
+              </figcaption>
+            </figure>
+          ) : (
+            <div class="todo-box">
+              {/* TODO(klient): doplnit vlastní fotografie k této stránce */}
+              Fotografie k této službě doplníme z vlastních realizací.
+            </div>
+          )
+        }
+        {
+          s?.includes && (
+            <div class="card">
+              <h3>V ceně služby</h3>
+              <ul class="check-list">
+                {s.includes.map((i) => (
+                  <li>{i}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+        {
+          page.specs && page.specs.length > 0 && (
+            <div class="card">
+              <h3>Technické údaje</h3>
+              <dl class="dl-grid">
+                {page.specs.map((sp) => (
+                  <>
+                    <dt>{sp.label}</dt>
+                    <dd>{sp.value}</dd>
+                  </>
+                ))}
+              </dl>
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="use-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Využití</span>
+        <h2 id="use-title">{isService ? 'Pro jaké zakázky' : `Kdy zvolit ${t!.name}`}</h2>
+      </div>
+      <ul class="use-grid">
+        {(s?.uses ?? t!.suitableFor).map((u) => <li>{u}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--navy" aria-labelledby="proc-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Postup</span>
+        <h2 id="proc-title">Jak probíhá realizace</h2>
+      </div>
+      <ProcessSteps steps={s?.process ?? services[0].process} />
+    </div>
+  </section>
+
+  {
+    refs.length > 0 && (
+      <section class="section" aria-labelledby="refs-title">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Reference</span>
+            <h2 id="refs-title">Související realizace</h2>
+          </div>
+          <div class="grid grid--3">
+            {refs.map((r) => (
+              <ReferenceCard reference={r} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <FaqList items={page.faq} />
+
+  <section class="section" aria-labelledby="rel-title">
+    <div class="container">
+      <h2 id="rel-title" class="rel-title">{isService ? 'Lešenářské systémy, které používáme' : 'Související služby'}</h2>
+      <ul class="rel-links">
+        {
+          related.map((r) => (
+            <li>
+              <a href={`/${r.slug}`}>{'name' in r ? r.name : r.title}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand href={`/poptavka${preset}`} />
+</BaseLayout>
+
+<style>
+  .features {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+  .feature {
+    border-left: 3px solid var(--c-yellow);
+    padding-left: var(--space-4);
+  }
+  .feature p {
+    margin: 0;
+  }
+  .side {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .side__photo {
+    margin: 0;
+  }
+  .side__photo figcaption {
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+    margin-top: var(--space-2);
+  }
+  .use-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .use-grid li {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    font-weight: 600;
+    color: var(--c-navy-800);
+  }
+  .rel-title {
+    font-size: var(--fs-xl);
+  }
+  .rel-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .rel-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border: 2px solid var(--c-navy-800);
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--c-navy-800);
+  }
+  .rel-links a:hover {
+    background: var(--c-navy-800);
+    color: #fff;
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+import SimplePage from '../layouts/SimplePage.astro';
+import { branches } from '../data/branches';
+import { company, telHref } from '../data/company';
+---
+
+<SimplePage
+  title="Kariéra"
+  seoTitle="Kariéra – práce u lešenářské firmy | J.P.L. LEŠENÍ"
+  description="Práce v J.P.L. LEŠENÍ: montáž lešení, doprava a technické pozice na střediscích Praha, Plzeň, Karlovy Vary a Olomouc. Ozvěte se nám."
+  lead="Montáž lešení zajišťujeme převážně vlastními lidmi. Pokud vás práce s lešením zajímá, ozvěte se."
+>
+  <h2>Koho obvykle hledáme</h2>
+  <p>
+    V minulosti jsme nabírali zejména lešenáře, řidiče dodávek a nákladních vozidel (sk. B a C) a dělníky. Aktuální
+    volná místa vám sdělíme telefonicky nebo e-mailem.
+  </p>
+  {/* TODO(klient): doplnit aktuální volné pozice (název, středisko, požadavky, nabídka) – inzeráty z let 2016–2024 byly odstraněny jako neaktuální. */}
+  <h2>Co u nás najdete</h2>
+  <ul class="check-list">
+    <li>Stabilní firmu na trhu od roku {company.foundingYear}</li>
+    <li>Pravidelná školení pro montáž lešení</li>
+    <li>Práci na střediscích {branches.filter((b) => b.office.country === 'CZ').map((b) => b.name).join(', ')}</li>
+  </ul>
+  <h2>Jak se ozvat</h2>
+  <p>
+    Zavolejte na <a href={telHref(company.phone)}>{company.phone}</a> nebo napište na
+    <a href={`mailto:${company.email}?subject=Zájem o práci`}>{company.email}</a>. Uveďte, o jakou práci máte zájem a
+    na kterém středisku.
+  </p>
+</SimplePage>

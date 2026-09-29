@@ -1,0 +1,156 @@
+---
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { scaffoldTypes } from '../data/scaffoldTypes';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Typy lešení', href: '/typy-leseni' },
+];
+---
+
+<BaseLayout
+  title="Typy lešení – PERI UP T70, HAKI, trubkové | J.P.L. LEŠENÍ"
+  description="Lešenářské systémy v půjčovně J.P.L. LEŠENÍ: PERI UP T70, HAKI (včetně pojízdného) a trubkové lešení. Porovnání a doporučení podle typu stavby."
+  breadcrumbs={breadcrumbs}
+>
+  <PageHero
+    title="Typy lešení"
+    lead="V půjčovně máme tři lešenářské systémy. Který je vhodný pro vaši stavbu, doporučí technik po zaměření – rozhoduje tvar objektu, zatížení, přístup a doba pronájmu."
+    breadcrumbs={breadcrumbs}
+  />
+
+  <section class="section">
+    <div class="container types">
+      {
+        scaffoldTypes.map((t) => (
+          <article class="type">
+            <div class="type__head">
+              <Icon name="layers" size={32} />
+              <h2>
+                <a href={`/${t.slug}`}>{t.name}</a>
+              </h2>
+            </div>
+            <p class="lead">{t.lead}</p>
+            <div class="type__cols">
+              <div>
+                <h3>Hlavní výhody</h3>
+                <ul class="check-list">
+                  {t.features.map((f) => (
+                    <li>{f.title}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Vhodné pro</h3>
+                <ul class="check-list">
+                  {t.suitableFor.map((s) => (
+                    <li>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <a class="btn btn--secondary" href={`/${t.slug}`}>
+              Více o systému {t.name}
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="cmp">
+    <div class="container">
+      <h2 id="cmp">Rychlé srovnání</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-labelledby="cmp">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Systém</th>
+              <th scope="col">Princip</th>
+              <th scope="col">Typické použití</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">PERI UP T70</th>
+              <td>Systémové lešení s předem montovaným zábradlím</td>
+              <td>Fasády, novostavby, rychlá a bezpečná montáž</td>
+            </tr>
+            <tr>
+              <th scope="row">HAKI</th>
+              <td>Dílcové lešení, pevně stojící i pojízdné</td>
+              <td>Fasády, pojízdné věže, prodej</td>
+            </tr>
+            <tr>
+              <th scope="row">Trubkové</th>
+              <td>Trubky DN 40 a spojky montované na místě</td>
+              <td>Památky, interiéry, atypické tvary</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .types {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .type {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-left: 5px solid var(--c-yellow);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 1rem + 2vw, 2.5rem);
+  }
+  .type__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--c-navy-600);
+  }
+  .type__head h2 {
+    margin: 0;
+  }
+  .type__head a {
+    color: var(--c-navy-800);
+    text-decoration: none;
+  }
+  .type .lead {
+    margin-top: var(--space-4);
+  }
+  .type__cols {
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    margin-bottom: var(--space-5);
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--c-border);
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--c-navy-800);
+    color: #fff;
+  }
+  tbody th {
+    color: var(--c-navy-800);
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+/** Renderováno na serveru, aby se i bez JavaScriptu zobrazila chyba z ?chyba=… a předvyplnění z URL. */
+import Icon from '../../components/Icon.astro';
+import InquiryForm from '../../components/InquiryForm.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { branches } from '../../data/branches';
+import { company, telHref } from '../../data/company';
+
+export const prerender = false;
+
+const q = Astro.url.searchParams;
+const errorCode = q.get('chyba');
+const service = q.get('sluzba') ?? '';
+const branch = q.get('stredisko') ?? 'nevim';
+
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: 'Poptávka lešení', href: '/poptavka' },
+];
+---
+
+<BaseLayout
+  title="Nezávazná poptávka lešení | J.P.L. LEŠENÍ"
+  description="Poptejte pronájem, montáž nebo prodej lešení. Technik se vám ozve, zaměří stavbu a připraví cenovou nabídku zdarma."
+  canonicalPath="/poptavka"
+  breadcrumbs={breadcrumbs}
+>
+  <PageHero
+    title="Nezávazná poptávka lešení"
+    lead="Vyplňte, co o stavbě víte. Technik se vám ozve, domluví prohlídku a připraví cenovou nabídku – zdarma, i když se nakonec rozhodnete jinak."
+    breadcrumbs={breadcrumbs}
+    cta={false}
+  />
+
+  <section class="section section--white">
+    <div class="container two-col">
+      <div id="formular">
+        <h2 id="form-title" class="visually-hidden">Poptávkový formulář</h2>
+        <InquiryForm errorCode={errorCode} service={service} branch={branch} headingId="form-title" />
+      </div>
+
+      <aside class="aside">
+        <div class="card">
+          <h2 class="aside__h">Co se stane po odeslání</h2>
+          <ol class="aside__steps">
+            <li>Poptávka přijde přímo na zvolené středisko.</li>
+            <li>Technik vás kontaktuje a domluví prohlídku.</li>
+            <li>Stavbu zaměří a převezme dokumentaci.</li>
+            <li>Dostanete cenovou nabídku s termínem montáže.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h2 class="aside__h">Raději telefonicky?</h2>
+          <p><a class="aside__phone" href={telHref(company.phone)}><Icon name="phone" size={20} />{company.phone}</a></p>
+          <p>
+            E-mail: <a href={`mailto:${company.email}`}>{company.email}</a>
+          </p>
+          <ul class="aside__branches">
+            {
+              branches.map((b) => (
+                <li>
+                  <a href={`/strediska/${b.slug}`}>{b.name}</a>: <a href={telHref(b.phone)}>{b.phone}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .aside {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .aside__h {
+    font-size: var(--fs-lg);
+  }
+  .aside__steps {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .aside__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    min-height: 44px;
+  }
+  .aside__branches {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--fs-sm);
+  }
+  .aside__branches a {
+    display: inline-block;
+    min-height: 32px;
+    line-height: 32px;
+  }
+</style>

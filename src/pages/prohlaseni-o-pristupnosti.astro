@@ -1,0 +1,34 @@
+---
+import SimplePage from '../layouts/SimplePage.astro';
+import { company } from '../data/company';
+---
+
+<SimplePage
+  title="Prohlášení o přístupnosti"
+  seoTitle="Prohlášení o přístupnosti | J.P.L. LEŠENÍ"
+  description="Prohlášení o přístupnosti webu www.jplleseni.cz – cílová úroveň WCAG 2.2 AA, známá omezení a kontakt pro zpětnou vazbu."
+>
+  <p>
+    {company.legalName} usiluje o to, aby web www.jplleseni.cz byl přístupný všem uživatelům. Cílem je soulad s
+    požadavky WCAG 2.2 na úrovni AA.
+  </p>
+  <h2>Co jsme zajistili</h2>
+  <ul class="check-list">
+    <li>Sémantická struktura stránek, jeden hlavní nadpis a logická hierarchie nadpisů</li>
+    <li>Ovládání celého webu klávesnicí včetně menu a formuláře, viditelné zvýraznění fokusu</li>
+    <li>Popisky a srozumitelné chybové zprávy ve formuláři</li>
+    <li>Textové alternativy fotografií</li>
+    <li>Kontrast textu minimálně 4,5 : 1</li>
+    <li>Respektování nastavení „omezit pohyb“</li>
+  </ul>
+  <h2>Známá omezení</h2>
+  <p>
+    Popisky některých fotografií v referencích jsou obecné, protože k nim nejsou k dispozici podrobné informace. Mapa
+    Google Maps je obsah třetí strany a nemusí být plně přístupná – adresy středisek jsou vždy uvedeny i textem.
+  </p>
+  {/* TODO(klient): doplnit datum vypracování prohlášení a posledního testu. */}
+  <h2>Zpětná vazba</h2>
+  <p>
+    Pokud narazíte na problém s přístupností, napište nám na <a href={`mailto:${company.email}`}>{company.email}</a>.
+  </p>
+</SimplePage>

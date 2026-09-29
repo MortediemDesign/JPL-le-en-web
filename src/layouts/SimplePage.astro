@@ -1,0 +1,29 @@
+---
+/** Jednoduchá textová stránka (právní informace, kariéra…). */
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  seoTitle: string;
+  description: string;
+  lead?: string;
+  noindex?: boolean;
+}
+const { title, seoTitle, description, lead, noindex } = Astro.props;
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '');
+const breadcrumbs = [
+  { label: 'Úvod', href: '/' },
+  { label: title, href: path },
+];
+---
+
+<BaseLayout title={seoTitle} description={description} breadcrumbs={breadcrumbs} noindex={noindex}>
+  <PageHero title={title} lead={lead} breadcrumbs={breadcrumbs} cta={false} />
+  <section class="section section--white">
+    <div class="container prose">
+      <slot />
+    </div>
+  </section>
+  <slot name="after" />
+</BaseLayout>

@@ -1,0 +1,180 @@
+---
+import { branches } from '../data/branches';
+import { company, telHref } from '../data/company';
+import { services } from '../data/services';
+import { scaffoldTypes } from '../data/scaffoldTypes';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <Logo inverted />
+      <p>
+        Pronájem, montáž a prodej lešení od roku {company.foundingYear}. Střediska Praha, Plzeň, Karlovy Vary, Olomouc a
+        Bratislava.
+      </p>
+      <p class="footer__contact">
+        <a href={telHref(company.phone)}><Icon name="phone" size={18} />{company.phone}</a>
+        <a href={`mailto:${company.email}`}><Icon name="mail" size={18} />{company.email}</a>
+      </p>
+      <a class="btn btn--primary" href="/poptavka">Nezávazně poptat lešení</a>
+    </div>
+
+    <nav aria-labelledby="f-services">
+      <h2 id="f-services" class="footer__h">Služby</h2>
+      <ul>
+        {services.map((s) => <li><a href={`/${s.slug}`}>{s.navLabel}</a></li>)}
+      </ul>
+      <h2 class="footer__h footer__h--gap" id="f-types">Typy lešení</h2>
+      <ul aria-labelledby="f-types">
+        {scaffoldTypes.map((t) => <li><a href={`/${t.slug}`}>{t.name}</a></li>)}
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="f-branches">
+      <h2 id="f-branches" class="footer__h">Střediska</h2>
+      <ul class="footer__branches">
+        {
+          branches.map((b) => (
+            <li>
+              <a href={`/strediska/${b.slug}`}>{b.name}</a>
+              <span>{b.phone}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="f-company">
+      <h2 id="f-company" class="footer__h">Společnost</h2>
+      <ul>
+        <li><a href="/o-nas">O společnosti</a></li>
+        <li><a href="/reference">Reference</a></li>
+        <li><a href="/kariera">Kariéra</a></li>
+        <li><a href="/kontakty">Kontakty</a></li>
+        <li><a href={company.facebook} rel="noopener" target="_blank">Facebook<span class="visually-hidden"> (otevře se v novém okně)</span></a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="footer__legal">
+    <div class="container footer__legal-inner">
+      <p>
+        © {year}
+        {company.legalName} · IČ {company.ico} · DIČ {company.dic} · {company.seat.street}, {company.seat.zip}
+        {company.seat.city}
+      </p>
+      <ul>
+        <li><a href="/gdpr">Ochrana osobních údajů</a></li>
+        <li><a href="/prohlaseni-o-pristupnosti">Prohlášení o přístupnosti</a></li>
+        <li><a href="/dotacni-program-up-a-eu">Dotační program ÚP a EU</a></li>
+        <li><a href="/mapa-stranek">Mapa stránek</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--c-navy-900);
+    color: #c9d5e6;
+    padding-top: var(--space-8);
+    font-size: var(--fs-sm);
+  }
+  .footer a:not(.btn) {
+    color: #fff;
+    text-decoration: none;
+  }
+  .footer a:not(.btn):hover {
+    color: var(--c-yellow);
+    text-decoration: underline;
+  }
+  .footer__grid {
+    display: grid;
+    gap: var(--space-7);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    padding-bottom: var(--space-8);
+  }
+  .footer__brand {
+    grid-column: 1 / -1;
+    max-width: 26rem;
+  }
+  @media (min-width: 1024px) {
+    .footer__grid {
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    }
+    .footer__brand {
+      grid-column: auto;
+    }
+  }
+  .footer__brand p {
+    margin-top: var(--space-4);
+  }
+  .footer__contact {
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--fs-base);
+  }
+  .footer__contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+  }
+  .footer__h {
+    color: #fff;
+    font-size: var(--fs-base);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-3);
+  }
+  .footer__h--gap {
+    margin-top: var(--space-6);
+  }
+  .footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .footer li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+  }
+  .footer__branches li {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-2);
+  }
+  .footer__branches li a {
+    min-height: 28px;
+    font-weight: 700;
+  }
+  .footer__legal {
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    padding-block: var(--space-5);
+  }
+  .footer__legal-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .footer__legal p {
+    margin: 0;
+  }
+  .footer__legal ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+  }
+  /* rezerva pro mobilní lištu */
+  @media (max-width: 767px) {
+    .footer {
+      padding-bottom: 4.5rem;
+    }
+  }
+</style>

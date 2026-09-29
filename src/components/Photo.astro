@@ -1,0 +1,48 @@
+---
+/** Fotografie realizace s rezervovaným poměrem stran (bez CLS) a responzivním srcset. */
+import { photoSrc, photoSrcset } from '../lib/images';
+
+interface Props {
+  oid: number;
+  alt: string;
+  sizes?: string;
+  ratio?: string;
+  eager?: boolean;
+  class?: string;
+}
+const { oid, alt, sizes = '(min-width: 1200px) 400px, (min-width: 768px) 50vw, 100vw', ratio = '4 / 3', eager = false, class: cls } =
+  Astro.props;
+---
+
+<div class:list={['photo', cls]} style={`aspect-ratio:${ratio}`}>
+  <img
+    src={photoSrc(oid, 800)}
+    srcset={photoSrcset(oid)}
+    sizes={sizes}
+    alt={alt}
+    width="800"
+    height="600"
+    loading={eager ? 'eager' : 'lazy'}
+    decoding={eager ? 'sync' : 'async'}
+    fetchpriority={eager ? 'high' : 'auto'}
+  />
+</div>
+
+<style>
+  .photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    /* Náhradní pozadí, pokud se fotografie nenačte */
+    background:
+      linear-gradient(135deg, var(--c-navy-700), var(--c-navy-900)),
+      var(--c-navy-800);
+  }
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    color: #c9d5e6;
+    font-size: var(--fs-sm);
+  }
+</style>

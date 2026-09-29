@@ -1,0 +1,453 @@
+---
+/**
+ * Poptávkový formulář. Funguje i bez JavaScriptu (POST → 303 redirect),
+ * s JS validuje sdíleným schématem (src/lib/inquiry.ts) a odesílá přes fetch.
+ */
+import { ATTACHMENT, BRANCH_OPTIONS, SERVICE_OPTIONS } from '../lib/inquiry';
+import Icon from './Icon.astro';
+
+interface Props {
+  service?: string;
+  branch?: string;
+  /** Chybový kód z no-JS odeslání (?chyba=…). */
+  errorCode?: string | null;
+  headingId?: string;
+}
+const { service = '', branch = 'nevim', errorCode, headingId } = Astro.props;
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY as string | undefined;
+
+const serverErrors: Record<string, string> = {
+  validace: 'Poptávku se nepodařilo odeslat – zkontrolujte prosím povinná pole a zkuste to znovu.',
+  velikost: `Příloha je příliš velká. Maximum je ${ATTACHMENT.maxLabel}.`,
+  limit: 'Odeslali jste několik poptávek za krátkou dobu. Zkuste to prosím později nebo nám zavolejte.',
+  server: 'Poptávku se nepodařilo odeslat kvůli technické chybě. Zavolejte nám prosím nebo napište na info@jplleseni.cz.',
+  format: 'Formulář se nepodařilo zpracovat. Zkuste to prosím znovu.',
+};
+const initialError = errorCode ? (serverErrors[errorCode] ?? serverErrors.format) : undefined;
+---
+
+<form
+  class="inquiry"
+  action="/api/poptavka"
+  method="post"
+  enctype="multipart/form-data"
+  novalidate
+  data-inquiry-form
+  aria-labelledby={headingId}
+>
+  <div class="inquiry__alert" role="alert" tabindex="-1" data-form-alert hidden={!initialError}>
+    {initialError}
+  </div>
+
+  <fieldset>
+    <legend>Kontaktní údaje</legend>
+    <div class="inquiry__grid">
+      <div class="field">
+        <label for="f-company">Firma <span class="req">(povinné)</span></label>
+        <input id="f-company" name="company" type="text" autocomplete="organization" required maxlength="150" aria-describedby="e-company" />
+        <p class="field__error" id="e-company" data-error-for="company"></p>
+      </div>
+      <div class="field">
+        <label for="f-contactName">Kontaktní osoba <span class="req">(povinné)</span></label>
+        <input id="f-contactName" name="contactName" type="text" autocomplete="name" required maxlength="120" aria-describedby="e-contactName" />
+        <p class="field__error" id="e-contactName" data-error-for="contactName"></p>
+      </div>
+      <div class="field">
+        <label for="f-phone">Telefon <span class="req">(povinné)</span></label>
+        <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="30" placeholder="+420 …" aria-describedby="e-phone" />
+        <p class="field__error" id="e-phone" data-error-for="phone"></p>
+      </div>
+      <div class="field">
+        <label for="f-email">E-mail <span class="req">(povinné)</span></label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required maxlength="150" aria-describedby="e-email" />
+        <p class="field__error" id="e-email" data-error-for="email"></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Projekt</legend>
+    <div class="inquiry__grid">
+      <div class="field">
+        <label for="f-service">Typ služby <span class="req">(povinné)</span></label>
+        <select id="f-service" name="service" required aria-describedby="e-service">
+          <option value="" selected={!service}>Vyberte…</option>
+          {SERVICE_OPTIONS.map((o) => <option value={o.value} selected={o.value === service}>{o.label}</option>)}
+        </select>
+        <p class="field__error" id="e-service" data-error-for="service"></p>
+      </div>
+      <div class="field">
+        <label for="f-branch">Středisko</label>
+        <select id="f-branch" name="branch" aria-describedby="h-branch e-branch">
+          {BRANCH_OPTIONS.map((o) => <option value={o.value} selected={o.value === branch}>{o.label}</option>)}
+        </select>
+        <p class="field__hint" id="h-branch">Poptávku předáme nejbližšímu středisku.</p>
+        <p class="field__error" id="e-branch" data-error-for="branch"></p>
+      </div>
+      <div class="field field--wide">
+        <label for="f-siteAddress">Adresa realizace <span class="req">(povinné)</span></label>
+        <input
+          id="f-siteAddress"
+          name="siteAddress"
+          type="text"
+          required
+          maxlength="250"
+          autocomplete="off"
+          placeholder="Ulice, číslo, obec"
+          aria-describedby="e-siteAddress"
+        />
+        <p class="field__error" id="e-siteAddress" data-error-for="siteAddress"></p>
+      </div>
+      <div class="field field--wide">
+        <label for="f-term">Předpokládaný termín</label>
+        <input id="f-term" name="term" type="text" maxlength="100" placeholder="např. od května 2027, cca 3 měsíce" aria-describedby="h-term e-term" />
+        <p class="field__hint" id="h-term">Zahájení a přibližná doba pronájmu, pokud je znáte.</p>
+        <p class="field__error" id="e-term" data-error-for="term"></p>
+      </div>
+      <div class="field field--wide">
+        <label for="f-message">Popis projektu <span class="req">(povinné)</span></label>
+        <textarea id="f-message" name="message" rows="6" required maxlength="5000" aria-describedby="h-message e-message"></textarea>
+        <p class="field__hint" id="h-message">Typ objektu, rozsah (plocha nebo délka × výška), druh prací, omezení na místě.</p>
+        <p class="field__error" id="e-message" data-error-for="message"></p>
+      </div>
+      <div class="field field--wide">
+        <label for="f-attachment">Příloha (výkresy, fotografie)</label>
+        <input id="f-attachment" name="attachment" type="file" accept={ATTACHMENT.accept} aria-describedby="h-attachment e-attachment" />
+        <p class="field__hint" id="h-attachment">
+          Jeden soubor do {ATTACHMENT.maxLabel}: PDF, JPG, PNG, WEBP, HEIC, DWG, DXF nebo ZIP (více souborů zabalte do ZIP).
+        </p>
+        <p class="field__error" id="e-attachment" data-error-for="attachment"></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- Ochrana proti spamu: honeypot (název „www“ zachován ze starého formuláře) + časová značka -->
+  <div class="hp" aria-hidden="true">
+    <label for="f-www">Nevyplňujte toto pole</label>
+    <input id="f-www" name="www" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+  <input type="hidden" name="startedAt" value="" data-started-at />
+  {siteKey && <div class="cf-turnstile" data-sitekey={siteKey} data-language="cs" data-appearance="interaction-only" />}
+
+  <div class="field field--check">
+    <input id="f-consent" name="consent" type="checkbox" value="on" required aria-describedby="e-consent" />
+    <label for="f-consent">
+      Souhlasím se zpracováním osobních údajů za účelem vyřízení poptávky. Více v <a href="/gdpr">zásadách ochrany osobních údajů</a>.
+      <span class="req">(povinné)</span>
+    </label>
+    <p class="field__error" id="e-consent" data-error-for="consent"></p>
+  </div>
+
+  <div class="inquiry__submit">
+    <button type="submit" class="btn btn--primary btn--lg" data-submit>
+      <span class="spinner" aria-hidden="true"></span>
+      <span data-submit-label>Odeslat poptávku</span>
+      <Icon name="arrow" size={20} />
+    </button>
+    <p class="inquiry__note">Odpovídáme obvykle v pracovní dny. Prohlídka a cenová nabídka jsou zdarma.</p>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-live></p>
+</form>
+
+{siteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
+<script>
+  import { FIELD_LABELS, normalize, validate, validateAttachmentMeta, type Errors, type FieldName } from '../lib/inquiry';
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-inquiry-form]')) {
+    const alertBox = form.querySelector<HTMLElement>('[data-form-alert]')!;
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]')!;
+    const live = form.querySelector<HTMLElement>('[data-live]')!;
+    const started = form.querySelector<HTMLInputElement>('[data-started-at]')!;
+    started.value = String(Date.now());
+
+    // Předvyplnění z URL: ?sluzba=pronajem&stredisko=plzen
+    const params = new URLSearchParams(location.search);
+    const preset = (name: string, value: string | null) => {
+      const el = form.elements.namedItem(name) as HTMLSelectElement | null;
+      if (el && value && [...el.options].some((o) => o.value === value)) el.value = value;
+    };
+    preset('service', params.get('sluzba'));
+    preset('branch', params.get('stredisko'));
+
+    const touched = new Set<string>();
+
+    const collect = () => {
+      const fd = new FormData(form);
+      const raw: Record<string, unknown> = Object.fromEntries([...fd.entries()].filter(([, v]) => typeof v === 'string'));
+      raw.consent = (form.elements.namedItem('consent') as HTMLInputElement).checked;
+      return { fd, data: normalize(raw) };
+    };
+
+    const currentErrors = (): Errors => {
+      const errors = validate(collect().data);
+      const file = (form.elements.namedItem('attachment') as HTMLInputElement).files?.[0];
+      const fileErr = validateAttachmentMeta(file);
+      if (fileErr) errors.attachment = fileErr;
+      return errors;
+    };
+
+    const showErrors = (errors: Errors, only?: Set<string>) => {
+      form.querySelectorAll<HTMLElement>('[data-error-for]').forEach((el) => {
+        const name = el.dataset.errorFor as FieldName;
+        if (only && !only.has(name)) return;
+        const msg = errors[name] ?? '';
+        el.textContent = msg;
+        const input = form.elements.namedItem(name) as HTMLElement | null;
+        if (input) {
+          if (msg) input.setAttribute('aria-invalid', 'true');
+          else input.removeAttribute('aria-invalid');
+        }
+      });
+    };
+
+    const showAlert = (html: string) => {
+      alertBox.innerHTML = html;
+      alertBox.hidden = false;
+      alertBox.focus();
+    };
+
+    form.addEventListener('focusout', (e) => {
+      const name = (e.target as HTMLInputElement).name;
+      if (!name || name === 'www') return;
+      touched.add(name);
+      showErrors(currentErrors(), touched);
+    });
+    form.addEventListener('change', (e) => {
+      const name = (e.target as HTMLInputElement).name;
+      if (name && touched.has(name)) showErrors(currentErrors(), touched);
+      if (name === 'attachment') {
+        touched.add(name);
+        showErrors(currentErrors(), touched);
+      }
+    });
+
+    const setLoading = (loading: boolean) => {
+      submitBtn.disabled = loading;
+      submitBtn.classList.toggle('is-loading', loading);
+      submitBtn.setAttribute('aria-busy', String(loading));
+      submitLabel.textContent = loading ? 'Odesílám…' : 'Odeslat poptávku';
+      live.textContent = loading ? 'Odesílám poptávku.' : '';
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errors = currentErrors();
+      Object.keys(FIELD_LABELS).forEach((k) => touched.add(k));
+      showErrors(errors);
+      const names = Object.keys(errors) as FieldName[];
+      if (names.length) {
+        showAlert(
+          `<strong>Opravte prosím ${names.length === 1 ? 'toto pole' : 'tato pole'}:</strong><ul>${names
+            .map((n) => `<li><a href="#f-${n}">${FIELD_LABELS[n]}</a></li>`)
+            .join('')}</ul>`,
+        );
+        return;
+      }
+
+      alertBox.hidden = true;
+      setLoading(true);
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: collect().fd,
+          headers: { Accept: 'application/json' },
+        });
+        const json = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          redirect?: string;
+          errors?: Errors;
+          message?: string;
+        };
+        if (res.ok && json.ok) {
+          live.textContent = 'Poptávka byla odeslána.';
+          location.assign(json.redirect ?? '/poptavka/odeslano');
+          return;
+        }
+        if (json.errors) showErrors(json.errors);
+        showAlert(json.message ?? 'Poptávku se nepodařilo odeslat. Zkuste to prosím znovu nebo nám zavolejte.');
+      } catch {
+        showAlert('Nepodařilo se spojit se serverem. Zkontrolujte připojení a zkuste to znovu, případně volejte +420 602 440 035.');
+      }
+      setLoading(false);
+      (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
+    });
+
+    alertBox.addEventListener('click', (e) => {
+      const a = (e.target as Element).closest('a[href^="#f-"]');
+      if (!a) return;
+      e.preventDefault();
+      document.querySelector<HTMLElement>(a.getAttribute('href')!)?.focus();
+    });
+  }
+</script>
+
+<style>
+  .inquiry {
+    display: grid;
+    gap: var(--space-6);
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  legend {
+    font-weight: 800;
+    font-size: var(--fs-lg);
+    color: var(--c-navy-800);
+    margin-bottom: var(--space-4);
+    padding: 0;
+  }
+  .inquiry__grid {
+    display: grid;
+    gap: var(--space-4) var(--space-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    min-width: 0;
+  }
+  .field--wide {
+    grid-column: 1 / -1;
+  }
+  label {
+    font-weight: 700;
+  }
+  .req {
+    font-weight: 400;
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+  }
+  input[type='text'],
+  input[type='email'],
+  input[type='tel'],
+  select,
+  textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid #8a96a8;
+    border-radius: var(--radius);
+    background: #fff;
+    font-size: 1rem; /* ≥16px – iOS nezoomuje */
+  }
+  textarea {
+    resize: vertical;
+    min-height: 9rem;
+  }
+  input[type='file'] {
+    width: 100%;
+    min-height: 48px;
+    padding: var(--space-2);
+    border: 1.5px dashed #8a96a8;
+    border-radius: var(--radius);
+    background: #fff;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--c-navy-800);
+  }
+  [aria-invalid='true'] {
+    border-color: var(--c-error) !important;
+    background: var(--c-error-bg) !important;
+  }
+  .field__hint {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--c-muted);
+  }
+  .field__error {
+    margin: 0;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--c-error);
+  }
+  .field__error:empty {
+    display: none;
+  }
+  .field__error::before {
+    content: '⚠ ';
+  }
+  .field--check {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: var(--space-3);
+  }
+  .field--check label {
+    font-weight: 400;
+  }
+  .field--check .field__error {
+    grid-column: 1 / -1;
+  }
+  input[type='checkbox'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--c-navy-800);
+  }
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .inquiry__alert {
+    border-left: 4px solid var(--c-error);
+    background: var(--c-error-bg);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius);
+  }
+  .inquiry__alert :global(ul) {
+    margin: var(--space-2) 0 0;
+  }
+  .inquiry__alert :global(a) {
+    color: var(--c-error);
+    font-weight: 700;
+  }
+  .inquiry__submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .inquiry__note {
+    margin: 0;
+    color: var(--c-muted);
+    font-size: var(--fs-sm);
+    flex: 1 1 14rem;
+  }
+  [data-submit] {
+    min-width: 14rem;
+  }
+  [data-submit]:disabled {
+    cursor: progress;
+    opacity: 0.8;
+  }
+  .spinner {
+    display: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 3px solid rgb(7 26 51 / 0.25);
+    border-top-color: var(--c-navy-900);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .is-loading .spinner {
+    display: inline-block;
+  }
+  .is-loading :global(svg) {
+    display: none;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

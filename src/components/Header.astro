@@ -1,0 +1,400 @@
+---
+import { company, telHref } from '../data/company';
+import { mainNav } from '../data/navigation';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string, children?: { href: string }[]) =>
+  path === href || path.startsWith(href + '/') || Boolean(children?.some((c) => path === c.href));
+---
+
+<header class="site-header" data-header>
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <span>Pronájem, montáž a prodej lešení v ČR a na Slovensku od roku {company.foundingYear}</span>
+      <span class="topbar__contacts">
+        <a href={telHref(company.phone)}><Icon name="phone" size={16} />{company.phone}</a>
+        <a href={`mailto:${company.email}`}><Icon name="mail" size={16} />{company.email}</a>
+      </span>
+    </div>
+  </div>
+
+  <div class="container header__bar">
+    <a href="/" class="header__logo" aria-label="J.P.L. LEŠENÍ – úvodní stránka">
+      <Logo />
+    </a>
+
+    <nav class="nav" id="main-nav" aria-label="Hlavní navigace" data-nav>
+      <ul class="nav__list">
+        {
+          mainNav.map((item, i) => (
+            <li class:list={['nav__item', { 'has-sub': item.children }]}>
+              <a
+                href={item.href}
+                class="nav__link"
+                aria-current={path === item.href ? 'page' : isActive(item.href, item.children) ? 'true' : undefined}
+              >
+                {item.label}
+              </a>
+              {item.children && (
+                <>
+                  <button
+                    type="button"
+                    class="nav__toggle"
+                    aria-expanded="false"
+                    aria-controls={`sub-${i}`}
+                    data-sub-toggle
+                  >
+                    <span class="visually-hidden">Podnabídka {item.label}</span>
+                    <Icon name="chevron" size={18} />
+                  </button>
+                  <ul class="nav__sub" id={`sub-${i}`}>
+                    {item.children.map((c) => (
+                      <li>
+                        <a href={c.href} aria-current={path === c.href ? 'page' : undefined}>
+                          {c.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+      <div class="nav__mobile-contact">
+        <a class="btn btn--primary btn--lg" href="/poptavka">Poptat lešení</a>
+        <a class="btn btn--secondary btn--lg" href={telHref(company.phone)}>
+          <Icon name="phone" size={20} />Zavolat {company.phone}
+        </a>
+        <a href={`mailto:${company.email}`} class="nav__mail">{company.email}</a>
+      </div>
+    </nav>
+
+    <div class="header__actions">
+      <a class="btn btn--primary header__cta" href="/poptavka">Poptat lešení</a>
+      <button
+        type="button"
+        class="menu-btn"
+        aria-expanded="false"
+        aria-controls="main-nav"
+        data-menu-btn
+      >
+        <span class="menu-btn__open"><Icon name="menu" /></span>
+        <span class="menu-btn__close"><Icon name="close" /></span>
+        <span class="menu-btn__label">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const mq = window.matchMedia('(min-width: 1200px)');
+
+  const setMenu = (open: boolean, returnFocus = true) => {
+    if (!btn || !nav || !header) return;
+    btn.setAttribute('aria-expanded', String(open));
+    header.classList.toggle('is-open', open);
+    document.documentElement.classList.toggle('menu-open', open);
+    if (open) nav.querySelector<HTMLElement>('a, button')?.focus();
+    else if (returnFocus) btn.focus();
+  };
+
+  btn?.addEventListener('click', () => setMenu(btn.getAttribute('aria-expanded') !== 'true'));
+  mq.addEventListener('change', () => setMenu(false, false));
+
+  const closeSubs = (except?: Element) =>
+    document.querySelectorAll<HTMLButtonElement>('[data-sub-toggle]').forEach((t) => {
+      if (t !== except) t.setAttribute('aria-expanded', 'false');
+    });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-sub-toggle]').forEach((t) => {
+    t.addEventListener('click', () => {
+      const open = t.getAttribute('aria-expanded') !== 'true';
+      closeSubs(t);
+      t.setAttribute('aria-expanded', String(open));
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const openSub = document.querySelector<HTMLButtonElement>('[data-sub-toggle][aria-expanded="true"]');
+    if (openSub) {
+      openSub.setAttribute('aria-expanded', 'false');
+      openSub.focus();
+    } else if (btn?.getAttribute('aria-expanded') === 'true') setMenu(false);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (mq.matches && !(e.target as Element).closest('.nav__item')) closeSubs();
+  });
+
+  // Fokus uvězněný v otevřeném mobilním menu
+  header?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !header.classList.contains('is-open') || !nav || !btn) return;
+    const items = [btn, ...nav.querySelectorAll<HTMLElement>('a, button')].filter((el) => el.offsetParent !== null);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--c-surface);
+    box-shadow: 0 1px 0 var(--c-border);
+  }
+  .topbar {
+    background: var(--c-navy-900);
+    color: #c9d5e6;
+    font-size: var(--fs-sm);
+    display: none;
+  }
+  .topbar__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 2.25rem;
+    gap: var(--space-4);
+  }
+  .topbar__contacts {
+    display: flex;
+    gap: var(--space-5);
+  }
+  .topbar a {
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .topbar a:hover {
+    color: var(--c-yellow);
+  }
+  .header__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: var(--header-h);
+  }
+  .header__logo {
+    display: inline-flex;
+    flex: none;
+    padding-block: var(--space-2);
+  }
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0 var(--space-3);
+    background: transparent;
+    border: 2px solid var(--c-border);
+    border-radius: var(--radius);
+    color: var(--c-navy-800);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .menu-btn__close,
+  .is-open .menu-btn__open {
+    display: none;
+  }
+  .is-open .menu-btn__close {
+    display: inline-flex;
+  }
+  .menu-btn__label {
+    display: none;
+  }
+
+  /* Mobilní navigace */
+  .nav {
+    display: none;
+  }
+  .is-open .nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    background: var(--c-surface);
+    padding: var(--space-5) var(--gutter) var(--space-8);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid var(--c-border);
+  }
+  .nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav__item {
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .nav__link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    font-weight: 700;
+    font-size: var(--fs-md);
+    color: var(--c-navy-800);
+    text-decoration: none;
+  }
+  .nav__link[aria-current] {
+    color: var(--c-navy-600);
+    text-decoration: underline;
+    text-decoration-color: var(--c-yellow);
+    text-decoration-thickness: 3px;
+  }
+  .nav__toggle {
+    display: none;
+  }
+  .nav__sub {
+    list-style: none;
+    padding: 0 0 var(--space-3) var(--space-4);
+    margin: 0;
+    width: 100%;
+  }
+  .nav__sub a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-text);
+    text-decoration: none;
+  }
+  .nav__sub a[aria-current='page'] {
+    font-weight: 700;
+    color: var(--c-navy-600);
+  }
+  .nav__mobile-contact {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .nav__mail {
+    text-align: center;
+    padding: var(--space-2);
+  }
+  .header__cta {
+    padding-inline: var(--space-4);
+    min-height: 48px;
+  }
+
+  /* Na úzkých displejích je CTA trvale ve spodní mobilní liště (MobileBar) */
+  @media (max-width: 419px) {
+    .header__cta {
+      display: none;
+    }
+  }
+  @media (min-width: 480px) {
+    .menu-btn__label {
+      display: inline;
+    }
+  }
+  @media (min-width: 768px) {
+    .topbar {
+      display: block;
+    }
+    .is-open .nav {
+      inset: calc(var(--header-h) + 2.25rem) 0 0 0;
+    }
+  }
+
+  /* Desktop navigace */
+  @media (min-width: 1200px) {
+    .menu-btn,
+    .nav__mobile-contact {
+      display: none;
+    }
+    .nav,
+    .is-open .nav {
+      display: block;
+      position: static;
+      padding: 0;
+      border: 0;
+      overflow: visible;
+      background: none;
+    }
+    .nav__list {
+      display: flex;
+      gap: var(--space-1);
+    }
+    .nav__item {
+      border: 0;
+      position: relative;
+      flex-wrap: nowrap;
+    }
+    .nav__link {
+      font-size: var(--fs-base);
+      padding: 0 var(--space-2) 0 var(--space-3);
+      min-height: 48px;
+    }
+    .nav__item:not(.has-sub) .nav__link {
+      padding-right: var(--space-3);
+    }
+    .nav__link:hover {
+      color: var(--c-navy-600);
+    }
+    .nav__toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      min-height: 48px;
+      padding: 0;
+      background: none;
+      border: 0;
+      color: var(--c-navy-800);
+      cursor: pointer;
+    }
+    .nav__toggle[aria-expanded='true'] :global(svg) {
+      transform: rotate(180deg);
+    }
+    .nav__sub {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 17rem;
+      padding: var(--space-2);
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+    .nav__sub a {
+      padding: 0 var(--space-3);
+      border-radius: var(--radius);
+    }
+    .nav__sub a:hover {
+      background: var(--c-bg);
+    }
+    .nav__toggle[aria-expanded='true'] + .nav__sub,
+    .has-sub:hover .nav__sub {
+      display: block;
+    }
+  }
+</style>

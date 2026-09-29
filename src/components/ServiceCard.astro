@@ -1,0 +1,71 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+interface Props {
+  href: string;
+  title: string;
+  text: string;
+  icon: IconName;
+}
+const { href, title, text, icon } = Astro.props;
+---
+
+<article class="svc-card">
+  <span class="svc-card__icon"><Icon name={icon} size={28} /></span>
+  <h3><a href={href}>{title}</a></h3>
+  <p>{text}</p>
+  <span class="svc-card__more" aria-hidden="true">Více <Icon name="arrow" size={18} /></span>
+</article>
+
+<style>
+  .svc-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .svc-card:hover {
+    border-color: var(--c-navy-600);
+    box-shadow: var(--shadow-lg);
+  }
+  .svc-card:focus-within {
+    box-shadow: var(--focus);
+  }
+  .svc-card__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius);
+    background: var(--c-navy-800);
+    color: var(--c-yellow);
+    margin-bottom: var(--space-4);
+  }
+  h3 a {
+    color: var(--c-navy-800);
+    text-decoration: none;
+  }
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  h3 a:focus-visible {
+    box-shadow: none;
+  }
+  p {
+    color: var(--c-muted);
+    flex: 1;
+  }
+  .svc-card__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    color: var(--c-navy-600);
+  }
+</style>

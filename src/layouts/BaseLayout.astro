@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import MobileBar from '../components/MobileBar.astro';
+import { SITE_URL } from '../data/company';
+import { breadcrumbLd, organizationLd, type Crumb } from '../lib/seo';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Kanonická cesta; výchozí = aktuální URL. */
+  canonicalPath?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  breadcrumbs?: Crumb[];
+  jsonLd?: object[];
+  /** URL obrázku, který je LCP prvkem – přednačte se. */
+  preloadImage?: { href: string; srcset?: string; sizes?: string };
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  ogImage = '/og-default.jpg',
+  ogType = 'website',
+  noindex = false,
+  breadcrumbs,
+  jsonLd = [],
+  preloadImage,
+} = Astro.props;
+
+const path = canonicalPath ?? (Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/');
+const canonical = path === '/' ? `${SITE_URL}/` : new URL(path, SITE_URL).toString().replace(/\/$/, '');
+const ogImageUrl = new URL(ogImage, SITE_URL).toString();
+const structured = [organizationLd(), ...(breadcrumbs ? [breadcrumbLd(breadcrumbs)] : []), ...jsonLd];
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#0b2545" />
+    <meta name="google-site-verification" content="gEjqgfjalex7BcnHKSs41O5mam_ISQUottc5oJizZc4" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:site_name" content="J.P.L. LEŠENÍ" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {
+      preloadImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={preloadImage.href}
+          imagesrcset={preloadImage.srcset}
+          imagesizes={preloadImage.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
+
+    {structured.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+    <Header />
+    <main id="obsah" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <MobileBar />
+  </body>
+</html>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+import Icon from '../../components/Icon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { company, telHref } from '../../data/company';
+---
+
+<BaseLayout
+  title="Poptávka odeslána | J.P.L. LEŠENÍ"
+  description="Děkujeme za poptávku. Technik J.P.L. LEŠENÍ se vám ozve a domluví další postup."
+  noindex
+>
+  <section class="section">
+    <div class="container done">
+      <span class="done__icon"><Icon name="check" size={40} /></span>
+      <h1>Děkujeme, poptávku jsme přijali</h1>
+      <p class="lead">
+        Poptávka odešla na příslušné středisko. Technik se vám ozve na uvedený telefon nebo e-mail, domluví prohlídku stavby
+        a následně připraví cenovou nabídku.
+      </p>
+      <h2>Co můžete připravit</h2>
+      <ul class="check-list">
+        <li>Výkresovou dokumentaci nebo fotografie objektu, pokud jste je nepřiložili</li>
+        <li>Informace o přístupu na stavbu a místě pro složení materiálu</li>
+        <li>Požadovaný termín montáže a přibližnou dobu pronájmu</li>
+      </ul>
+      <p>
+        Spěcháte? Zavolejte nám na <a href={telHref(company.phone)}>{company.phone}</a>.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/reference">Prohlédnout realizace</a>
+        <a class="btn btn--secondary" href="/">Zpět na úvod</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .done {
+    max-width: 44rem;
+  }
+  .done__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: var(--c-success-bg);
+    color: var(--c-success);
+    margin-bottom: var(--space-5);
+  }
+  .done h2 {
+    font-size: var(--fs-xl);
+    margin-top: var(--space-6);
+  }
+  .done .check-list {
+    margin-bottom: var(--space-6);
+  }
+</style>
