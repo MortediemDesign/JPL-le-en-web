@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = ({ site }) =>
-  new Response(
+  import.meta.env.PUBLIC_PREVIEW === '1'
+    ? new Response('User-agent: *\nDisallow: /\n', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+    : new Response(
     [
       'User-agent: *',
       'Allow: /',

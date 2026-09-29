@@ -1,0 +1,51 @@
+# Dočasný náhled webu na GitHub Pages (statická verze, formulář v demo režimu, noindex).
+# Ostrý web běží na Node serveru – viz README.
+name: Náhled na GitHub Pages
+
+on:
+  push:
+    branches: [redesign-2026]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - name: Statický build náhledu
+        run: npx astro build
+        env:
+          PUBLIC_PREVIEW: '1'
+      - name: Přepis cest na podadresář Pages
+        run: node scripts/pages-rebase.mjs dist
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

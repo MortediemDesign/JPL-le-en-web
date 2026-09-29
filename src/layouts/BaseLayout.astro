@@ -20,17 +20,20 @@ export interface Props {
   preloadImage?: { href: string; srcset?: string; sizes?: string };
 }
 
+const PREVIEW = import.meta.env.PUBLIC_PREVIEW === '1';
 const {
   title,
   description,
   canonicalPath,
   ogImage = '/og-default.jpg',
   ogType = 'website',
-  noindex = false,
+  noindex: noindexProp = false,
   breadcrumbs,
   jsonLd = [],
   preloadImage,
 } = Astro.props;
+// Náhled (GitHub Pages) se nikdy neindexuje – nesmí konkurovat ostrému webu.
+const noindex = noindexProp || PREVIEW;
 
 const path = canonicalPath ?? (Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/');
 const canonical = path === '/' ? `${SITE_URL}/` : new URL(path, SITE_URL).toString().replace(/\/$/, '');
@@ -76,6 +79,13 @@ const structured = [organizationLd(), ...(breadcrumbs ? [breadcrumbLd(breadcrumb
   </head>
   <body>
     <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+    {
+      PREVIEW && (
+        <p class="preview-bar">
+          <strong>Náhled nového webu</strong> – pracovní verze, údaje čekají na ověření, formulář nic neodesílá.
+        </p>
+      )
+    }
     <Header />
     <main id="obsah" tabindex="-1">
       <slot />
@@ -86,6 +96,15 @@ const structured = [organizationLd(), ...(breadcrumbs ? [breadcrumbLd(breadcrumb
 </html>
 
 <style>
+  .preview-bar {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    background: #fff4cc;
+    color: #071a33;
+    font-size: 0.875rem;
+    text-align: center;
+    border-bottom: 1px solid #d99f00;
+  }
   main:focus {
     outline: none;
   }

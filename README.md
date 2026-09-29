@@ -38,3 +38,15 @@ Položky označené `verify: true` / `TODO(klient)` je nutné před spuštěním
 
 Konfigurace přes proměnné prostředí – viz `.env.example` (SMTP, Turnstile, kanonický host).
 Před přepnutím DNS spusťte `npm run images:migrate` (stáhne fotografie ze současného CMS).
+
+## Náhled na GitHub Pages
+
+Workflow `.github/workflows/pages.yml` při každém pushi do `redesign-2026` sestaví statický náhled
+(`PUBLIC_PREVIEW=1`) a nasadí ho na https://mortediemdesign.github.io/JPL-le-en-web/.
+
+Náhled se od ostrého webu liší:
+- formulář jen zkontroluje pole, nic neodesílá (není server),
+- staré URL se přesměrují HTML stránkou místo HTTP 301,
+- všechny stránky mají `noindex`, aby náhled nekonkuroval ostrému webu ve vyhledávačích.
+
+Jednorázové nastavení: *Settings → Pages → Build and deployment → Source: GitHub Actions*.
